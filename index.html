@@ -708,27 +708,30 @@
       const pdfDataUri = pdf.output('datauristring');
       const base64Content = pdfDataUri.split(',')[1];
 
-    //  alert(Teken);
-
-        // Octokit.js
-        // https://github.com/octokit/core.js#readme
-        const octokit = new Octokit({
-        auth: Teken
+        // Ahora sí puedes usarlo en la llamada a GitHub
+        fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${Teken}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: `ODS ${archivoSalidaPDF} - ${new Date().toISOString()}`,
+                content: base64Content,
+                branch: 'main'
+            })
         })
-
-        await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
-        owner: OWNER,
-        repo: REPO,
-        path: PATH,
-        message: 'my commit message',
-        committer: {
-            name: 'IDC',
-        },
-        content: 'bXkgbmV3IGZpbGUgY29udGVudHM=',
-        headers: {
-            'X-GitHub-Api-Version': '2022-11-28'
+        .then(response => response.json())
+        .then(data => {
+        if (data.commit) {
+            console.log("¡PDF subido con éxito!");
+        } else {
+            console.error("Error:", data);
         }
         })
+        .catch(err => console.error("Fallo en fetch:", err));
+
 
 
 
