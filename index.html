@@ -349,7 +349,8 @@
             
             const ticketNumber = document.getElementById('ticketNumber').value.trim();
             
-            PATH = `ods/${ticketNumber}.pdf`;
+            PATHPDF = `ods/${ticketNumber}.pdf`;
+            PATHTXT = `ods/${ticketNumber}.txt`;
 
             if (!ticketNumber) {
                 showStatus('Por favor ingresa un número de ticket', 'error');
@@ -363,22 +364,22 @@
                 await ensureRepoExists();
                 
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
+                const pdf = new jsPDF();
                 
-                doc.setFontSize(16);
-                doc.text('Lorem ipsum dolor sit amet', 20, 20);
-                doc.setFontSize(12);
-                doc.text('Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 20, 40);
-                doc.text('Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', 20, 50);
+                pdf.setFontSize(16);
+                pdf.text('Lorem ipsum dolor sit amet', 20, 20);
+                pdf.setFontSize(12);
+                pdf.text('Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 20, 40);
+                pdf.text('Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', 20, 50);
                 
-                const pdfBase64 = doc.output('datauristring');
-                
-                const pdfFilename = `${ticketNumber}.pdf`;
+                const pdfBase64 = pdf.output('datauristring');
+                const PATH = "ods/"
+                const pdfFilename = PATHPDF;
                 await uploadPDFToGitHub(pdfFilename, pdfBase64);
                 
                 const timestamp = new Date().toLocaleString('es-MX');
                 const logContent = `Archivo creado: ${pdfFilename}\nFecha: ${timestamp}\nTicket: ${ticketNumber}`;
-                const logFilename = `${ticketNumber}.txt`;
+                const logFilename = PATHTXT;
                 
                 await uploadToGitHub(logFilename, logContent, `Crear log para ${ticketNumber}`);
                 
