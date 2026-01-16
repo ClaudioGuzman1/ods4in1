@@ -707,23 +707,20 @@
       // Después de haber llenado tu pdf con texto, tablas, imágenes, etc.
       const pdfDataUri = pdf.output('datauristring');
       const base64Content = pdfDataUri.split(',')[1];
-      alert(pdfDataUri);
-      (function(){return false;})();
 
         // Ahora sí puedes usarlo en la llamada a GitHub
         fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-        method: 'PUT',
-        headers: {
-            'Authorization': `token ${Teken}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            message: `ODS ${order.numeroTicket || order.id} - ${new Date().toISOString()}`,
-            content: base64Content,
-            branch: 'main'
-            // sha: "..."   ← si el archivo ya existe y quieres sobreescribir
-        })
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${Teken}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: `ODS ${archivoSalidaPDF} - ${new Date().toISOString()}`,
+                content: base64Content,
+                branch: 'main'
+            })
         })
         .then(response => response.json())
         .then(data => {
