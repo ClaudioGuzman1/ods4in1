@@ -770,8 +770,8 @@
         try {
             const pdf = generatePDF();
             const pdfBlob = pdf.output('blob');
-            const fileName = 'ODS_' + (order.numeroTicket || order.id) + '.pdf';
-            const txtFileName = 'ODS_' + (order.numeroTicket || order.id) + '_info.txt';
+            const fileName = archivoSalidaPDF;
+            const txtFileName = archivoSalidaTXT;
             
             // Convertir el PDF a base64
             const pdfBase64 = await blobToBase64(pdfBlob);
