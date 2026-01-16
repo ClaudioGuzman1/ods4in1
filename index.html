@@ -681,6 +681,7 @@
 
       pdf.save(archivoSalidaPDF);
       alert(pdf.output('datauribase64'));
+      return;
       const base64 = pdf.output('datauribase64').split(',')[1];
   
       fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`, {
@@ -1174,3 +1175,4 @@
 </body>
 
 </html>
+
