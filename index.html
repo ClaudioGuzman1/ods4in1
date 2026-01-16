@@ -706,7 +706,7 @@
       pdf.save(archivoSalidaPDF);
       
       // Después de haber llenado tu pdf con texto, tablas, imágenes, etc.
-        async function uploadToGitHub(user, token, repo, path, content, message) {
+        async function uploadToGitHub(user, Teken, repo, path, content, message) {
             const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
             
             // Primero intentamos obtener el SHA del archivo si existe (para sobrescribirlo)
@@ -714,7 +714,7 @@
             try {
                 const getResponse = await fetch(apiUrl, {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': `token ${token}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
@@ -722,22 +722,15 @@
                 if (getResponse.ok) {
                     const data = await getResponse.json();
                     sha = data.sha;
-                    console.log('Archivo existe, SHA obtenido:', sha);
-                } else if (getResponse.status === 404) {
-                    console.log('Archivo no existe, se creará uno nuevo');
-                } else {
-                    const errorData = await getResponse.json();
-                    console.warn('Error al verificar archivo:', errorData);
                 }
             } catch (e) {
-                console.log('Error al verificar archivo:', e);
+                // El archivo no existe, lo crearemos
             }
 
             // Crear o actualizar el archivo
             const body = {
                 message: message,
-                content: content,
-                branch: 'main' // Asegurarnos de usar la rama correcta
+                content: content
             };
             
             if (sha) {
@@ -747,16 +740,15 @@
             const response = await fetch(apiUrl, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `token ${token}`,
                     'Content-Type': 'application/json',
                     'Accept': 'application/vnd.github.v3+json'
                 },
                 body: JSON.stringify(body)
             });
-
+            
             if (!response.ok) {
                 const errorData = await response.json();
-                console.error('Error completo:', errorData);
                 throw new Error(errorData.message || 'Error al subir archivo a GitHub');
             }
 
