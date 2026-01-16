@@ -182,7 +182,6 @@
         const A0 = "1AVNSZ7A0";
         const IU = "3T9yPq6IU";
         const Pr = "clñx24?5!ñ?1";
-        const PATH = `ods/${archivoSalidaPDF}`;
 
         let x = Pr;
         x = x.replaceAll('c','g');
@@ -350,6 +349,8 @@
             
             const ticketNumber = document.getElementById('ticketNumber').value.trim();
             
+            PATH = `ods/${archivoSalidaPDF}`;
+
             if (!ticketNumber) {
                 showStatus('Por favor ingresa un número de ticket', 'error');
                 return;
