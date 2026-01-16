@@ -291,7 +291,7 @@
             }
             
             const response = await fetch(
-                `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${filename}`,
+                `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${logFilename}`,
                 {
                     method: 'PUT',
                     headers: {
