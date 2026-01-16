@@ -349,7 +349,7 @@
             
             const ticketNumber = document.getElementById('ticketNumber').value.trim();
             
-            PATH = `ods/${archivoSalidaPDF}`;
+            PATH = `ods/${ticketNumber}.pdf`;
 
             if (!ticketNumber) {
                 showStatus('Por favor ingresa un número de ticket', 'error');
