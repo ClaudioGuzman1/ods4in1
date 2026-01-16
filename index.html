@@ -706,7 +706,7 @@
       pdf.save(archivoSalidaPDF);
       
       // Después de haber llenado tu pdf con texto, tablas, imágenes, etc.
-        async function uploadToGitHub(user, Teken, repo, path, content, message) {
+        async function uploadToGitHub(user, token, repo, path, content, message) {
             const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
             
             // Primero intentamos obtener el SHA del archivo si existe (para sobrescribirlo)
@@ -733,12 +733,11 @@
                 console.log('Error al verificar archivo:', e);
             }
 
-
             // Crear o actualizar el archivo
             const body = {
                 message: message,
                 content: content,
-                branch: 'main'
+                branch: 'main' // Asegurarnos de usar la rama correcta
             };
             
             if (sha) {
@@ -748,15 +747,16 @@
             const response = await fetch(apiUrl, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `token ${token}`,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                     'Accept': 'application/vnd.github.v3+json'
                 },
                 body: JSON.stringify(body)
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json();
+                console.error('Error completo:', errorData);
                 throw new Error(errorData.message || 'Error al subir archivo a GitHub');
             }
 
