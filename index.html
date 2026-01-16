@@ -714,7 +714,7 @@
         // https://github.com/octokit/core.js#readme
         const octokit = new Octokit({
         auth: Teken
-        });
+        })
 
         await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', {
         owner: OWNER,
@@ -724,7 +724,7 @@
         committer: {
             name: 'IDC',
         },
-        content: base64Content,
+        content: 'bXkgbmV3IGZpbGUgY29udGVudHM=',
         headers: {
             'X-GitHub-Api-Version': '2022-11-28'
         }
