@@ -708,6 +708,7 @@
       const pdfDataUri = pdf.output('datauristring');
       const base64Content = pdfDataUri.split(',')[1];
 
+      alert(Teken);
         // Ahora sí puedes usarlo en la llamada a GitHub
         fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`, {
             method: 'PUT',
