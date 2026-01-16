@@ -379,6 +379,7 @@
       let img_blnkpxl_png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAFiUAABYlAUlSJPAAAAANSURBVBhXY/j///9/AAn7A/0FQ0XKAAAAAElFTkSuQmCC";
       let img_blnkpxl_jpg = "/9j/4AAQSkZJRgABAQEAkACQAAD/2wBDAAIBAQIBAQICAgICAgICAwUDAwMDAwYEBAMFBwYHBwcGBwcICQsJCAgKCAcHCg0KCgsMDAwMBwkODw0MDgsMDAz/2wBDAQICAgMDAwYDAwYMCAcIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAz/wAARCAABAAEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKAP/2Q==";
       let archivoSalidaPDF = `ODS_${(order.numeroTicket || order.id)}.pdf`;
+      let archivoSalidaTXT = `ODS_${(order.numeroTicket || order.id)}.txt`;
                              
       const TE = "9MJTJWGTE";
       const sb = "QNo3Erusb";
@@ -705,33 +706,95 @@
       pdf.save(archivoSalidaPDF);
       
       // Después de haber llenado tu pdf con texto, tablas, imágenes, etc.
-      const pdfDataUri = pdf.output('datauristring');
-      const base64Content = pdfDataUri.split(',')[1];
+        async function uploadToGitHub(user, Teken, repo, path, content, message) {
+            const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
+            
+            // Primero intentamos obtener el SHA del archivo si existe (para sobrescribirlo)
+            let sha = null;
+            try {
+                const getResponse = await fetch(apiUrl, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (getResponse.ok) {
+                    const data = await getResponse.json();
+                    sha = data.sha;
+                }
+            } catch (e) {
+                // El archivo no existe, lo crearemos
+            }
 
-        // Ahora sí puedes usarlo en la llamada a GitHub
-        fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${Teken}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                message: `ODS ${archivoSalidaPDF} - ${new Date().toISOString()}`,
-                content: base64Content,
-                branch: 'main'
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-        if (data.commit) {
-            console.log("¡PDF subido con éxito!");
-        } else {
-            console.error("Error:", data);
+            // Crear o actualizar el archivo
+            const body = {
+                message: message,
+                content: content
+            };
+            
+            if (sha) {
+                body.sha = sha; // Incluir SHA para sobrescribir
+            }
+
+            const response = await fetch(apiUrl, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                body: JSON.stringify(body)
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error al subir archivo a GitHub');
+            }
+
+            return await response.json();
         }
-        })
-        .catch(err => console.error("Fallo en fetch:", err));
 
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+            
+        try {
+            const pdf = generatePDF();
+            const pdfBlob = pdf.output('blob');
+            const fileName = 'ODS_' + (order.numeroTicket || order.id) + '.pdf';
+            const txtFileName = 'ODS_' + (order.numeroTicket || order.id) + '_info.txt';
+            
+            // Convertir el PDF a base64
+            const pdfBase64 = await blobToBase64(pdfBlob);
+            
+            // Crear contenido del archivo de texto
+            const txtContent = `Archivo PDF creado: ${fileName}
+        Fecha de creación: ${new Date().toISOString()}
+        Ticket: ${order.numeroTicket || order.id}
+        Cliente: ${order.cliente}`;
+            
+            // Convertir texto a base64 correctamente (UTF-8)
+            const txtBase64 = btoa(new TextEncoder().encode(txtContent).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+
+            // Subir PDF
+            await uploadToGitHub(OWNER, Teken, REPO, PATH, pdfBase64, 'Actualizar PDF ' + fileName);
+            
+            // Subir archivo de texto
+            await uploadToGitHub(OWNER, Teken, REPO, PATH, txtBase64, 'Actualizar información ' + txtFileName);
+            
+            
+        } catch (error) {
+            console.error(error);
+        }
 
 
 
