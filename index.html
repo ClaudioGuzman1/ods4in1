@@ -714,7 +714,7 @@
             try {
                 const getResponse = await fetch(apiUrl, {
                     headers: {
-                        'Authorization': `token ${token}`,
+                        'Authorization': `Bearer ${token}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
@@ -722,15 +722,23 @@
                 if (getResponse.ok) {
                     const data = await getResponse.json();
                     sha = data.sha;
+                    console.log('Archivo existe, SHA obtenido:', sha);
+                } else if (getResponse.status === 404) {
+                    console.log('Archivo no existe, se creará uno nuevo');
+                } else {
+                    const errorData = await getResponse.json();
+                    console.warn('Error al verificar archivo:', errorData);
                 }
             } catch (e) {
-                // El archivo no existe, lo crearemos
+                console.log('Error al verificar archivo:', e);
             }
+
 
             // Crear o actualizar el archivo
             const body = {
                 message: message,
-                content: content
+                content: content,
+                branch: 'main'
             };
             
             if (sha) {
