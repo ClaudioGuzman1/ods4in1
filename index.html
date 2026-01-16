@@ -755,7 +755,7 @@
             return await response.json();
         }
 
-        function blobToBase64(blob) {
+        async blobToBase64(blob) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onloadend = () => {
