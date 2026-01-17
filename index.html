@@ -373,7 +373,7 @@
                 pdf.text('Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', 20, 50);
                 
                 const pdfBase64 = pdf.output('datauristring');
-                const PATH = "ods/"
+                
                 const pdfFilename = PATHPDF;
                 await uploadPDFToGitHub(pdfFilename, pdfBase64);
                 
