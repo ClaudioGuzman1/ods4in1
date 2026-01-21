@@ -4,6 +4,7 @@ const OFFLINE_ASSETS = [
   "/",
   "/index.html",
   "/manifest.json",
+  "/styles.css",
   "/icons/icon-192.png",
   "/icons/icon-256.png",
   "/icons/icon-512.png"
